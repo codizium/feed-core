@@ -1,0 +1,22 @@
+{
+  "name": "feedjs-core",
+  "version": "1.0.0",
+  "description": "Core library for feedjs",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+  "build": "tsc"
+},
+  "keywords": [],
+  "author": [
+    {
+      "name": "Rapha Panchi",
+      "email": "raphapanchi@gmail.com",
+      "url": "https://github.com/ralphxp"
+    }
+  ],
+  "license": "ISC"
+}
