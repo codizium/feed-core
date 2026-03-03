@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    /* === Module System === */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* === Output === */
+    "target": "ES2020",
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    /* === Project Structure === */
+    /* rootDir is set per-package in package tsconfigs */
+    "rootDir": "./src",
+
+    /* === Type Safety === */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    /* === Interop & Stability === */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  }
+}

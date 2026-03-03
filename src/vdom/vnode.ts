@@ -8,8 +8,8 @@
 import type { IRNode } from '../ir/transform.js';
 
 // Symbol for element type
-export const FragmentSymbol = Symbol.for('feed.fragment');
-export const TextSymbol = Symbol.for('feed.text');
+export const FragmentSymbol = Symbol.for('feedjs.fragment');
+export const TextSymbol = Symbol.for('feedjs.text');
 
 // VDOM Node
 export interface VNode {

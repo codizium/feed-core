@@ -181,7 +181,7 @@ function normalizeChildren(children: VNode['children']): VNode[] {
   if (typeof children === 'string') {
     // Text node - return as single element
     return [{
-      type: Symbol.for('feed.text'),
+      type: Symbol.for('feedjs.text'),
       props: null,
       children: children,
       key: '',

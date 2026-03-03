@@ -1,7 +1,7 @@
 {
   "name": "feedjs-core",
-  "version": "1.0.0",
-  "description": "Core library for feed",
+  "version": "1.0.0-alpha.0",
+  "description": "Core library for feedjs",
   "type": "module",
   "main": "dist/index.js",
   "exports": {
@@ -18,15 +18,15 @@
       "url": "https://github.com/ralphxp"
     }
   ],
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:codizium/feed-core.git"
+    "url": "git@github.com:codizium/feedjs-core.git"
   },
   "bugs": {
-    "url": "https://github.com/codizium/feed-core/issues"
+    "url": "https://github.com/codizium/feedjs-core/issues"
   },
-  "homepage": "https://github.com/codizium/feed-core#readme"
+  "homepage": "https://github.com/codizium/feedjs-core#readme"
 
 
 }

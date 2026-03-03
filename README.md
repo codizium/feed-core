@@ -4,7 +4,7 @@ FeedJS Core is the heart of the FeedJS template engine. It provides the parser, 
 
 ## Features
 
-- **HTML Parser**: Parses `.feed.html` templates into an AST
+- **HTML Parser**: Parses `.feedjs.html` templates into an AST
 - **Template Directives**: Built-in support for:
   - `f-if` / `f-else` - Conditional rendering
   - `f-for` - List rendering with iteration
@@ -18,7 +18,7 @@ FeedJS Core is the heart of the FeedJS template engine. It provides the parser, 
 ## Installation
 
 ```bash
-npm install feed-core
+npm install feedjs-core
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ npm install feed-core
 ### Parse a Template
 
 ```typescript
-import { parseTemplate, transformAST, createVDOM } from 'feed-core';
+import { parseTemplate, transformAST, createVDOM } from 'feedjs-core';
 
 const template = `
 <div>
@@ -96,7 +96,7 @@ const vnode = createVDOM(ir, { title: 'Hello', message: 'World', items: [{ name:
 
 #### Layouts
 
-**Layout file (layout.feed.html):**
+**Layout file (layout.feedjs.html):**
 ```html
 <header>
   <h1>My App</h1>
@@ -109,9 +109,9 @@ const vnode = createVDOM(ir, { title: 'Hello', message: 'World', items: [{ name:
 </footer>
 ```
 
-**Page file (page.feed.html):**
+**Page file (page.feedjs.html):**
 ```html
-<layout src="./layout.feed.html">
+<layout src="./layout.feedjs.html">
   <p>This content goes into the slot!</p>
 </layout>
 ```
@@ -132,4 +132,4 @@ Creates a Virtual DOM tree from the IR using the provided state.
 
 ## License
 
-ISC
+MIT

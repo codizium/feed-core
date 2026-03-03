@@ -3,7 +3,7 @@
  * 
  * Resolves compile-time layout inheritance.
  * This module processes:
- * - <layout> and <feed-layout> elements for page-level layouts
+ * - <layout> and <feedjs-layout> elements for page-level layouts
  * - f:inherit attribute for element-level inheritance
  */
 
@@ -85,11 +85,11 @@ export function resolveLayout(
 }
 
 /**
- * Check if a node is a layout element (supports both <layout> and <feed-layout>)
+ * Check if a node is a layout element (supports both <layout> and <feedjs-layout>)
  */
 function isFeedLayout(node: FeedASTNode): boolean {
   if (node.type === 'Element') {
-    return node.tag === 'layout' || node.tag === 'feed-layout';
+    return node.tag === 'layout' || node.tag === 'feedjs-layout';
   }
   return false;
 }
