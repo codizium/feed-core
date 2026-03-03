@@ -1,0 +1,16 @@
+node_modules
+coverage
+*.log
+*.tsbuildinfo
+.DS_Store
+.idea
+.vscode
+*.env
+src
+*.env.local
+src/**/*.ts
+src/**/*.tsx
+src/**/*.js
+src/**/*.jsx
+*.env.development
+*.env.test

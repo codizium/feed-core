@@ -3,6 +3,7 @@
  *
  * Parses HTML templates into Feed AST nodes.
  * Handles standard HTML elements, text, comments, and Feed directives.
+ * Supports {{ expression }} interpolation syntax.
  */
 import type { FeedAST } from '../ast/nodes.js';
 /**

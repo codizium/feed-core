@@ -12,6 +12,7 @@ export interface VNode {
     props: VNodeProps | null;
     children: VNodeChild;
     key: string;
+    interpolation?: string;
     directives?: Array<{
         type: string;
         name: string;

@@ -5,8 +5,8 @@
  * VDOM is platform-agnostic and represents the renderable tree.
  */
 // Symbol for element type
-export const FragmentSymbol = Symbol.for('feedjs.fragment');
-export const TextSymbol = Symbol.for('feedjs.text');
+export const FragmentSymbol = Symbol.for('feed.fragment');
+export const TextSymbol = Symbol.for('feed.text');
 /**
  * Create a VDOM node from IR
  *
@@ -28,7 +28,7 @@ export function createVDOM(ir, state) {
  */
 function createVNodeFromIR(ir, state) {
     if (ir.kind === 'text') {
-        return createTextVNode(ir.value ?? '', state);
+        return createTextVNode(ir.value ?? '', state, ir);
     }
     if (ir.kind === 'fragment') {
         return createFragmentVNode(ir.children ?? [], state);
@@ -73,7 +73,18 @@ function createElementVNode(ir, state) {
 /**
  * Create a text VNode
  */
-function createTextVNode(value, state) {
+function createTextVNode(value, state, ir) {
+    // Check for interpolation
+    if (ir?.interpolation) {
+        const interpValue = evaluateExpression(ir.interpolation, state);
+        return {
+            type: TextSymbol,
+            props: null,
+            children: String(interpValue ?? ''),
+            key: '',
+            interpolation: ir.interpolation,
+        };
+    }
     // Don't evaluate at compile time - the runtime will handle directives
     // Just store the raw value
     return {

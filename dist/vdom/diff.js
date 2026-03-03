@@ -127,7 +127,7 @@ function normalizeChildren(children) {
     if (typeof children === 'string') {
         // Text node - return as single element
         return [{
-                type: Symbol.for('feedjs.text'),
+                type: Symbol.for('feed.text'),
                 props: null,
                 children: children,
                 key: '',

@@ -19,6 +19,7 @@ export interface FeedElementNode extends BaseFeedASTNode {
 export interface FeedTextNode extends BaseFeedASTNode {
     type: 'Text';
     value: string;
+    interpolation?: string;
 }
 export interface FeedCommentNode extends BaseFeedASTNode {
     type: 'Comment';

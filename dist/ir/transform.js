@@ -117,6 +117,14 @@ function transformDirective(directive) {
  * Transform text node
  */
 function transformText(node) {
+    // Check if this is an interpolation
+    if (node.interpolation) {
+        return {
+            kind: 'text',
+            value: '',
+            interpolation: node.interpolation,
+        };
+    }
     return {
         kind: 'text',
         value: node.value,

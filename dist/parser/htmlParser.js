@@ -3,10 +3,62 @@
  *
  * Parses HTML templates into Feed AST nodes.
  * Handles standard HTML elements, text, comments, and Feed directives.
+ * Supports {{ expression }} interpolation syntax.
  */
 import { isDirective, parseDirective } from './directiveParser.js';
-// Simple HTML tokenizer
+// Simple HTML tokenizer with interpolation support
 function tokenize(html) {
+    const tokens = [];
+    // Split by interpolation first
+    const segments = splitByInterpolation(html);
+    for (const segment of segments) {
+        // If segment is interpolation, add as interpolation token
+        if (segment.isInterpolation) {
+            tokens.push({ type: 'interpolation', value: segment.content, attributes: {} });
+            continue;
+        }
+        // Otherwise tokenize the HTML content
+        const htmlTokens = tokenizeHtml(segment.content);
+        tokens.push(...htmlTokens);
+    }
+    return tokens;
+}
+/**
+ * Split HTML by interpolation markers {{ }}
+ * Returns array of segments that are either plain HTML or interpolation expressions
+ */
+function splitByInterpolation(html) {
+    const segments = [];
+    let remaining = html;
+    let lastIndex = 0;
+    let match;
+    const regex = /\{\{([^}]+)\}\}/g;
+    while ((match = regex.exec(remaining)) !== null) {
+        const expr = match[1];
+        if (!expr)
+            continue;
+        // Add text before the interpolation
+        if (match.index > 0) {
+            segments.push({ content: remaining.slice(0, match.index), isInterpolation: false });
+        }
+        // Add the interpolation expression
+        segments.push({ content: expr.trim(), isInterpolation: true });
+        lastIndex = match.index + match[0].length;
+    }
+    // Add remaining text after last interpolation
+    if (lastIndex < remaining.length) {
+        segments.push({ content: remaining.slice(lastIndex), isInterpolation: false });
+    }
+    // Handle empty input
+    if (segments.length === 0 && html.length > 0) {
+        segments.push({ content: html, isInterpolation: false });
+    }
+    return segments;
+}
+/**
+ * Tokenize HTML content (without interpolation markers)
+ */
+function tokenizeHtml(html) {
     const tokens = [];
     let pos = 0;
     while (pos < html.length) {
@@ -95,13 +147,13 @@ function tokenize(html) {
         // Text content
         const nextTag = html.indexOf('<', pos);
         if (nextTag === -1) {
-            const text = html.slice(pos).trim();
+            const text = html.slice(pos);
             if (text) {
                 tokens.push({ type: 'text', value: text, attributes: {} });
             }
             break;
         }
-        const text = html.slice(pos, nextTag).trim();
+        const text = html.slice(pos, nextTag);
         if (text) {
             tokens.push({ type: 'text', value: text, attributes: {} });
         }
@@ -163,6 +215,12 @@ function parseNodes(state) {
             // Stop parsing siblings - we've closed a parent tag
             break;
         }
+        if (token.type === 'interpolation') {
+            // Create interpolation node
+            nodes.push(createInterpolationNode(token.value));
+            state.pos++;
+            continue;
+        }
         if (token.type === 'text') {
             nodes.push(createTextNode(token.value));
             state.pos++;
@@ -218,17 +276,22 @@ function parseSlotElement(state, token) {
                 state.pos++;
                 break;
             }
-            const childNodes = parseNodes(state);
-            children.push(...childNodes);
+            if (currentToken.type === 'interpolation') {
+                children.push(createInterpolationNode(currentToken.value));
+            }
+            else if (currentToken.type === 'text') {
+                children.push(createTextNode(currentToken.value));
+            }
+            else if (currentToken.type === 'tagOpen' || currentToken.type === 'tagSelfClosing') {
+                children.push(parseElement(state, currentToken));
+            }
+            state.pos++;
         }
     }
-    else {
-        state.pos++;
-    }
     return {
-        type: 'Slot',
+        type: 'SlotPlaceholder',
         name,
-        fallback: children.length > 0 ? children : [],
+        children,
     };
 }
 /**
@@ -236,17 +299,7 @@ function parseSlotElement(state, token) {
  */
 function parseTemplateElement(state, token) {
     const attributes = token.attributes ?? {};
-    // Get slot name from #name syntax or v-slot:name
-    let name = '';
-    if (attributes['#']) {
-        name = attributes['#'];
-    }
-    else if (attributes['v-slot']) {
-        name = attributes['v-slot'];
-    }
-    else if (attributes['slot']) {
-        name = attributes['slot'];
-    }
+    const name = attributes['name'] || 'default';
     const children = [];
     if (!token.selfClosing) {
         state.pos++;
@@ -260,12 +313,17 @@ function parseTemplateElement(state, token) {
                 state.pos++;
                 break;
             }
-            const childNodes = parseNodes(state);
-            children.push(...childNodes);
+            if (currentToken.type === 'interpolation') {
+                children.push(createInterpolationNode(currentToken.value));
+            }
+            else if (currentToken.type === 'text') {
+                children.push(createTextNode(currentToken.value));
+            }
+            else if (currentToken.type === 'tagOpen' || currentToken.type === 'tagSelfClosing') {
+                children.push(parseElement(state, currentToken));
+            }
+            state.pos++;
         }
-    }
-    else {
-        state.pos++;
     }
     return {
         type: 'TemplateBlock',
@@ -274,26 +332,25 @@ function parseTemplateElement(state, token) {
     };
 }
 /**
- * Parse a regular element (non-special)
+ * Parse a regular element
  */
 function parseRegularElement(state, token) {
     const tagName = token.tagName ?? '';
     const attributes = token.attributes ?? {};
     // Separate directives from regular attributes
-    const regularAttrs = {};
+    const elementAttrs = {};
     const directives = [];
     for (const [key, value] of Object.entries(attributes)) {
         if (isDirective(key)) {
             directives.push(parseDirective(key, value));
         }
         else {
-            regularAttrs[key] = value;
+            elementAttrs[key] = value;
         }
     }
     const children = [];
     if (!token.selfClosing) {
         state.pos++;
-        // Parse children until we find the closing tag
         while (state.pos < state.tokens.length) {
             const currentToken = state.tokens[state.pos];
             if (!currentToken) {
@@ -301,24 +358,37 @@ function parseRegularElement(state, token) {
                 continue;
             }
             if (currentToken.type === 'tagClose' && currentToken.tagName === tagName) {
-                // Found closing tag
                 state.pos++;
                 break;
             }
-            // Parse child nodes
-            const childNodes = parseNodes(state);
-            children.push(...childNodes);
+            if (currentToken.type === 'interpolation') {
+                children.push(createInterpolationNode(currentToken.value));
+            }
+            else if (currentToken.type === 'text') {
+                children.push(createTextNode(currentToken.value));
+            }
+            else if (currentToken.type === 'tagOpen' || currentToken.type === 'tagSelfClosing') {
+                children.push(parseElement(state, currentToken));
+            }
+            state.pos++;
         }
-    }
-    else {
-        state.pos++;
     }
     return {
         type: 'Element',
         tag: tagName,
-        attributes: regularAttrs,
-        directives,
+        attributes: elementAttrs,
         children,
+        directives,
+    };
+}
+/**
+ * Create an interpolation node
+ */
+function createInterpolationNode(expression) {
+    return {
+        type: 'Text',
+        value: '',
+        interpolation: expression,
     };
 }
 /**

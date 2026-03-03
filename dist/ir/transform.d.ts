@@ -18,6 +18,7 @@ export interface IRNode {
     key?: string;
     directives?: IRDirective[];
     value?: string;
+    interpolation?: string;
 }
 export interface IRDirective {
     type: string;
