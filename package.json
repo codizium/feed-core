@@ -1,5 +1,5 @@
 {
-  "name": "feed-core",
+  "name": "feedjs-core",
   "version": "1.0.0",
   "description": "Core library for feed",
   "type": "module",
